@@ -1,0 +1,40 @@
+min_size_cm: 6.0
+version: "v2.0"
+
+# ArUco reference marker — must match the physical printout from ml/make_marker.py
+marker_side_cm: 5.0
+
+# Pipeline attention thresholds (CONFIGURABLE — no code change required)
+min_onion_count: 2          # fewer detections → needs_attention flag
+min_confidence: 0.60        # mean confidence below this → needs_attention flag
+blur_threshold: 40.0        # Laplacian variance below this → image_quality_check fails
+
+# Three-Bucket Classification Mapping
+# Good onions >= min_size_cm -> grade_a
+# Good onions < min_size_cm -> urs (healthy but fails size spec)
+# Damaged, rotten, sprouted -> defective (any size)
+class_bucket_mapping:
+  good: "grade_a_or_urs"
+  damaged: "defective"
+  rotten: "defective"
+  sprouted: "defective"
+  undersized: "urs"
+
+defect_classes:
+  - good
+  - damaged
+  - rotten
+  - sprouted
+  - undersized
+
+# PLACEHOLDER / UNCONFIRMED THRESHOLDS (Subject to Agmark confirmation)
+# Evaluated in order: first match wins
+lot_grade_rules:
+  - grade: "Grade A"
+    condition: "grade_a_pct >= 70.0"
+    threshold: 70.0
+  - grade: "Defective"
+    condition: "defective_pct >= 30.0"
+    threshold: 30.0
+  - grade: "URS"
+    condition: "otherwise"

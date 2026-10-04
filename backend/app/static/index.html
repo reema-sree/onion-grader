@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kisan Setu - AI Powered Onion Grading</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#0A3323">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="app-container" class="app-container">
+    <!-- Offline Alert Banner -->
+    <div id="offline-banner" class="offline-banner">
+      <span>📡</span>
+      <span data-i18n="offline_notice">You are offline. Results will be saved locally.</span>
+    </div>
+
+    <!-- Global App Header -->
+    <header id="global-header" class="app-header">
+      <div class="header-brand">
+        <span class="logo-icon">🧅</span>
+        <h1 class="serif-wordmark" data-i18n="app_name">Kisan Setu</h1>
+      </div>
+      <div class="header-actions">
+        <span id="demo-indicator" class="demo-badge" style="display:none;" data-i18n="demo_mode">DEMO MODE</span>
+        <button id="lang-toggle-btn" class="icon-btn" title="Change Language" aria-label="Change Language">🌐</button>
+        <button id="logout-btn" class="icon-btn" title="Log Out" style="display:none;" aria-label="Log Out">🚪</button>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         SCREEN 1: SPLASH SCREEN
+         ==================================================================== -->
+    <section id="screen-splash" class="screen no-nav active">
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
+        <div style="font-size:4rem; margin-bottom:12px;">🧅🌱</div>
+        <h1 class="serif-wordmark" style="font-size:2.2rem; color:var(--color-forest); margin-bottom:6px;" data-i18n="app_name">Kisan Setu</h1>
+        <p style="font-size:1.05rem; font-weight:600; color:var(--color-olive); margin-bottom:24px;" data-i18n="tagline">AI Powered Onion Grading</p>
+        
+        <div class="card" style="width:100%; max-width:320px; padding:16px; margin-bottom:24px; text-align:left;">
+          <p style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:10px;" data-i18n="language">Select Language / भाषा चुनें / భాషను ఎంచుకోండి</p>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-sm btn-outline lang-btn active" data-lang="en" style="flex:1;">English</button>
+            <button class="btn btn-sm btn-outline lang-btn" data-lang="hi" style="flex:1;">हिन्दी</button>
+            <button class="btn btn-sm btn-outline lang-btn" data-lang="te" style="flex:1;">తెలుగు</button>
+          </div>
+        </div>
+
+        <button id="splash-get-started-btn" class="btn btn-primary btn-block" style="max-width:320px;" data-i18n="continue">Get Started →</button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 2: ROLE SELECTION & LOGIN
+         ==================================================================== -->
+    <section id="screen-role-select" class="screen no-nav">
+      <div style="margin-bottom:20px;">
+        <h2 class="serif-wordmark" style="font-size:1.6rem;" data-i18n="welcome_back">Welcome Back</h2>
+        <p style="font-size:0.9rem; color:var(--color-text-muted);" data-i18n="login_to_continue">Select your role to continue</p>
+      </div>
+
+      <!-- Role Selection Cards -->
+      <div class="role-card staff-accent selected" data-role="staff">
+        <div class="role-icon">🏬</div>
+        <div class="role-info">
+          <h3 data-i18n="role_staff">Procurement Staff</h3>
+          <p data-i18n="role_staff_desc">Grade and verify onion batches at procurement centres</p>
+        </div>
+      </div>
+
+      <div class="role-card farmer-accent" data-role="farmer">
+        <div class="role-icon">🧑‍🌾</div>
+        <div class="role-info">
+          <h3 data-i18n="role_farmer">Farmer</h3>
+          <p data-i18n="role_farmer_desc">View your verified batch reports and grading certificates</p>
+        </div>
+      </div>
+
+      <div class="role-card admin-accent" data-role="admin">
+        <div class="role-icon">🛡️</div>
+        <div class="role-info">
+          <h3 data-i18n="role_admin">Administrator</h3>
+          <p data-i18n="role_admin_desc">Manage centres, users, and grading rules</p>
+        </div>
+      </div>
+
+      <!-- Staff / Admin Login Form (Email + Password) -->
+      <div id="login-form-email" class="card" style="margin-top:12px;">
+        <div class="form-group">
+          <label class="form-label" data-i18n="email_label">Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="staff@agrigrade.in" value="staff@agrigrade.in">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="password_label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" value="DemoPass123!">
+        </div>
+
+        <div id="assisted-mode-wrapper" class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+          <input type="checkbox" id="assisted-mode-toggle" style="width:20px; height:20px; accent-color:var(--color-forest);">
+          <label for="assisted-mode-toggle" style="font-size:0.85rem; font-weight:600; cursor:pointer;" data-i18n="assisted_mode">Assisted Mode (CSC Operator)</label>
+        </div>
+
+        <button id="email-login-btn" class="btn btn-primary btn-block" data-i18n="login_btn">Log In</button>
+      </div>
+
+      <!-- Farmer Login Form (Phone + OTP) -->
+      <div id="login-form-phone" class="card" style="margin-top:12px; display:none;">
+        <div class="form-group">
+          <label class="form-label" data-i18n="phone_label">Phone Number</label>
+          <input type="tel" id="farmer-phone-input" class="form-input" placeholder="+919876543210" value="+919876543210">
+        </div>
+
+        <div id="otp-input-group" class="form-group" style="display:none;">
+          <label class="form-label" data-i18n="otp_label">6-Digit OTP</label>
+          <input type="text" id="farmer-otp-input" class="form-input" placeholder="123456" maxlength="6" value="123456">
+          <span style="font-size:0.75rem; color:#B45309; margin-top:4px; display:block;" data-i18n="mock_otp_hint">Dev Mode: Use OTP 123456</span>
+        </div>
+
+        <button id="farmer-otp-btn" class="btn btn-primary btn-block" data-i18n="get_otp">Get OTP</button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 3: STAFF DASHBOARD
+         ==================================================================== -->
+    <section id="screen-dashboard" class="screen">
+      <!-- Greeting Banner -->
+      <div class="card" style="background-color:var(--color-forest); color:var(--color-white); border:none; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <p style="font-size:0.8rem; opacity:0.85;" data-i18n="dashboard_greeting">Hello</p>
+            <h2 id="dash-user-name" style="font-size:1.3rem; color:var(--color-white);">Procurement Staff</h2>
+            <p id="dash-centre-name" style="font-size:0.8rem; opacity:0.85; margin-top:2px;">📍 Nashik APMC Centre (C01)</p>
+          </div>
+          <button id="dash-new-batch-quick-btn" class="btn btn-sm btn-rose" data-i18n="new_batch">+ New Batch</button>
+        </div>
+      </div>
+
+      <!-- Three Stat Tiles -->
+      <div class="stat-tiles-grid">
+        <div class="stat-tile active" data-filter="all">
+          <div id="stat-scanned-count" class="stat-number">0</div>
+          <div class="stat-label" data-i18n="stat_scanned">Scanned Today</div>
+        </div>
+        <div class="stat-tile" data-filter="approved">
+          <div id="stat-approved-count" class="stat-number">0</div>
+          <div class="stat-label" data-i18n="stat_approved">Approved</div>
+        </div>
+        <div class="stat-tile" data-filter="pending_review">
+          <div id="stat-pending-count" class="stat-number">0</div>
+          <div class="stat-label" data-i18n="stat_pending">Pending Review</div>
+        </div>
+      </div>
+
+      <!-- Recent Batches Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="font-size:1.05rem;" data-i18n="recent_batches">Recent Batches</h3>
+        <button id="dash-refresh-btn" class="btn btn-sm btn-outline" style="min-height:30px; padding:2px 8px;">🔄</button>
+      </div>
+
+      <!-- Batches List -->
+      <div id="dashboard-batches-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 4: CREATE BATCH
+         ==================================================================== -->
+    <section id="screen-create-batch" class="screen">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <button class="icon-btn back-btn" data-target="screen-dashboard">←</button>
+        <h2 class="serif-wordmark" data-i18n="create_batch_title">Create Batch</h2>
+      </div>
+
+      <div class="card">
+        <!-- Batch ID Auto assigned -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="batch_id_label">Batch Code</label>
+          <input type="text" id="create-batch-code" class="form-input" readonly value="KS-2026-XXXXX (Auto-assigned)">
+        </div>
+
+        <!-- Farmer Selection -->
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label class="form-label" style="margin-bottom:0;" data-i18n="farmer_label">Farmer</label>
+            <button id="quick-add-farmer-btn" class="btn btn-sm btn-outline" style="min-height:28px; padding:2px 8px; font-size:0.75rem;" data-i18n="quick_add_farmer">+ Quick Add</button>
+          </div>
+          <select id="create-farmer-select" class="form-select">
+            <option value="">Select Farmer...</option>
+          </select>
+        </div>
+
+        <!-- Procurement Centre -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="centre_label">Procurement Centre</label>
+          <select id="create-centre-select" class="form-select"></select>
+        </div>
+
+        <!-- Crop -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="crop_label">Crop</label>
+          <select id="create-crop-select" class="form-select">
+            <option value="onion" selected>🧅 Onion</option>
+            <option value="tomato" disabled>🍅 Tomato (Coming Soon)</option>
+            <option value="potato" disabled>🥔 Potato (Coming Soon)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" data-i18n="date_label">Batch Date</label>
+            <input type="date" id="create-date-input" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="weight_label">Weight (kg)</label>
+            <input type="number" id="create-weight-input" class="form-input" placeholder="e.g. 150" step="0.5">
+          </div>
+        </div>
+
+        <button id="create-batch-submit-btn" class="btn btn-primary btn-block" style="margin-top:8px;" data-i18n="continue_to_camera">Continue to Camera 📷</button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 5: CAPTURE CAMERA
+         ==================================================================== -->
+    <section id="screen-capture" class="screen no-nav">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <button class="icon-btn back-btn" data-target="screen-create-batch">←</button>
+        <h3 id="capture-batch-code-title" class="serif-wordmark">KS-2026-00001</h3>
+        <span id="capture-photo-counter" class="badge">0 / 3</span>
+      </div>
+
+      <!-- Camera Viewfinder -->
+      <div class="camera-view">
+        <video id="camera-video" autoplay playsinline></video>
+        <canvas id="camera-canvas" style="display:none;"></canvas>
+        
+        <div class="camera-overlay">
+          <!-- Marker Detection Indicator -->
+          <div id="live-marker-indicator" class="marker-indicator missing">
+            <span class="dot">●</span>
+            <span id="marker-indicator-text" data-i18n="marker_missing">Marker Missing — Place beside onions</span>
+          </div>
+
+          <div class="camera-hint-box" data-i18n="camera_hint">
+            Place the printed ArUco marker flat and spread onions apart
+          </div>
+        </div>
+      </div>
+
+      <!-- Thumbnails Strip (Up to 3 Photos) -->
+      <div id="thumbnails-strip" class="thumbnails-strip">
+        <div class="thumb-slot" id="thumb-slot-1"><span>📷 1</span></div>
+        <div class="thumb-slot" id="thumb-slot-2"><span>📷 2</span></div>
+        <div class="thumb-slot" id="thumb-slot-3"><span>📷 3</span></div>
+      </div>
+
+      <!-- Camera Controls -->
+      <div class="camera-controls">
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          📁 <span data-i18n="upload_file">Gallery</span>
+          <input type="file" id="camera-file-input" accept="image/*" multiple style="display:none;">
+        </label>
+
+        <button id="camera-shutter-btn" class="shutter-btn" aria-label="Take Photo">
+          <div class="shutter-inner"></div>
+        </button>
+
+        <button id="camera-flash-btn" class="btn btn-outline btn-sm">⚡ Flash</button>
+      </div>
+
+      <button id="start-analysis-btn" class="btn btn-primary btn-block" disabled style="margin-top:8px;" data-i18n="analyse_batch">
+        ⚡ Analyse Batch
+      </button>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 6: AI ANALYSIS PROGRESS
+         ==================================================================== -->
+    <section id="screen-analysis" class="screen no-nav">
+      <div style="text-align:center; margin-bottom:12px;">
+        <h2 class="serif-wordmark" data-i18n="analysis_title">AI Analysis</h2>
+        <p id="analysis-subtitle" style="font-size:0.85rem; color:var(--color-text-muted);" data-i18n="analysing_subtitle">Detecting individual onions & assessing quality...</p>
+      </div>
+
+      <!-- Progress Ring -->
+      <div class="progress-ring-container">
+        <div id="analysis-percent" class="progress-ring-text">0%</div>
+      </div>
+
+      <!-- Six-Stage Checklist -->
+      <ul class="stage-checklist">
+        <li class="stage-item pending" id="stage-image_quality_check">
+          <div class="stage-icon">📷</div>
+          <div style="flex:1;">
+            <div class="stage-title" data-i18n="stage_quality">Image Quality & Blur Check</div>
+            <div class="stage-desc" id="stage-desc-image_quality_check">Pending...</div>
+          </div>
+        </li>
+        <li class="stage-item pending" id="stage-marker_detection">
+          <div class="stage-icon">📐</div>
+          <div style="flex:1;">
+            <div class="stage-title" data-i18n="stage_marker">Reference Marker Calibration</div>
+            <div class="stage-desc" id="stage-desc-marker_detection">Pending...</div>
+          </div>
+        </li>
+        <li class="stage-item pending" id="stage-onion_detection">
+          <div class="stage-icon">🧅</div>
+          <div style="flex:1;">
+            <div class="stage-title" data-i18n="stage_detection">Onion Detection & Segmentation</div>
+            <div class="stage-desc" id="stage-desc-onion_detection">Pending...</div>
+          </div>
+        </li>
+        <li class="stage-item pending" id="stage-size_measurement">
+          <div class="stage-icon">📏</div>
+          <div style="flex:1;">
+            <div class="stage-title" data-i18n="stage_size">Physical Size Measurement</div>
+            <div class="stage-desc" id="stage-desc-size_measurement">Pending...</div>
+          </div>
+        </li>
+        <li class="stage-item pending" id="stage-defect_detection">
+          <div class="stage-icon">🔍</div>
+          <div style="flex:1;">
+            <div class="stage-title" data-i18n="stage_defects">Defect & Rot Classification</div>
+            <div class="stage-desc" id="stage-desc-defect_detection">Pending...</div>
+          </div>
+        </li>
+        <li class="stage-item pending" id="stage-grading">
+          <div class="stage-icon">📊</div>
+          <div style="flex:1;">
+            <div class="stage-title" data-i18n="stage_grading">Three-Bucket Agmark Grading</div>
+            <div class="stage-desc" id="stage-desc-grading">Pending...</div>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Failure / Retake Alert -->
+      <div id="analysis-error-card" class="card" style="display:none; background-color:#FDE8E8; border-color:#F8B4B4;">
+        <h4 style="color:#9B1C1C; margin-bottom:4px;">⚠ Quality Check Failed</h4>
+        <p id="analysis-error-guidance" style="font-size:0.85rem; color:#771D1D; margin-bottom:12px;"></p>
+        <button id="analysis-retake-btn" class="btn btn-rose btn-block" data-i18n="retake_photo">Retake Photo</button>
+      </div>
+
+      <button id="analysis-cancel-btn" class="btn btn-outline btn-block" style="margin-top:8px;" data-i18n="cancel_analysis">Cancel</button>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 7: AI RESULTS
+         ==================================================================== -->
+    <section id="screen-results" class="screen">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 class="serif-wordmark" data-i18n="results_title">AI Inspection Results</h2>
+        <span id="results-lot-grade-chip" class="lot-grade-chip grade-a">Grade A (72.5%)</span>
+      </div>
+
+      <!-- Needs Attention Alert Banner (if flagged) -->
+      <div id="needs-attention-banner" class="alert-banner" style="display:none;">
+        <span class="alert-icon">⚠️</span>
+        <div>
+          <div class="alert-title" data-i18n="needs_attention_title">Needs Attention</div>
+          <div id="needs-attention-text" class="alert-msg">Marker missing. Size estimates may be approximate.</div>
+        </div>
+      </div>
+
+      <!-- Interactive Annotated Canvas -->
+      <div class="canvas-interactive-wrap">
+        <canvas id="results-canvas"></canvas>
+      </div>
+      <p style="font-size:0.75rem; color:var(--color-text-muted); text-align:center; margin-bottom:10px;" data-i18n="tap_onion_hint">
+        Tap any onion below to view details or adjust classification
+      </p>
+
+      <!-- Three-Bucket Summary Card -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.85rem; font-weight:700; color:var(--color-forest);" data-i18n="total_onions">Total Onions</span>
+          <span id="res-total-onions" style="font-size:1.1rem; font-weight:800;">12</span>
+        </div>
+
+        <div class="buckets-grid">
+          <div class="bucket-card grade-a">
+            <div id="res-grade-a-pct" class="bucket-pct">75.0%</div>
+            <div id="res-grade-a-count" class="bucket-count">9 onions</div>
+            <div class="bucket-name" data-i18n="grade_a">Grade A</div>
+          </div>
+          <div class="bucket-card urs">
+            <div id="res-urs-pct" class="bucket-pct">16.7%</div>
+            <div id="res-urs-count" class="bucket-count">2 onions</div>
+            <div class="bucket-name" data-i18n="grade_urs">URS</div>
+          </div>
+          <div class="bucket-card defective">
+            <div id="res-defective-pct" class="bucket-pct">8.3%</div>
+            <div id="res-defective-count" class="bucket-count">1 onion</div>
+            <div class="bucket-name" data-i18n="grade_defective">Defective</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button id="results-review-btn" class="btn btn-primary btn-block" data-i18n="review_verify_btn">Review & Verify →</button>
+        <button id="results-gen-report-btn" class="btn btn-outline btn-block" data-i18n="generate_report_btn">Generate Report</button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 8: HUMAN VERIFICATION
+         ==================================================================== -->
+    <section id="screen-verify" class="screen">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+        <button class="icon-btn back-btn" data-target="screen-results">←</button>
+        <h2 class="serif-wordmark" data-i18n="verification_title">Quality Verification</h2>
+      </div>
+
+      <div class="card" style="text-align:center; padding:20px 16px;">
+        <p style="font-size:0.85rem; color:var(--color-text-muted);" data-i18n="ai_grade_result">AI Calculated Grade</p>
+        <div id="verify-ai-grade-badge" style="font-size:1.8rem; font-weight:800; color:var(--color-forest); margin:8px 0;">
+          Grade A (72.5%)
+        </div>
+        <p style="font-size:0.95rem; font-weight:600; margin-top:8px;" data-i18n="is_result_correct">Is this grading result correct?</p>
+      </div>
+
+      <!-- Decision Buttons -->
+      <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <button id="verify-approve-btn" class="btn btn-primary" style="flex:1;" data-i18n="approve_btn">✓ Approve</button>
+        <button id="verify-override-toggle-btn" class="btn btn-outline" style="flex:1;" data-i18n="override_btn">✎ Override</button>
+      </div>
+
+      <!-- Override Form (Collapsible) -->
+      <div id="override-form-card" class="card" style="display:none; background-color:#FFF5F5; border-color:#FEB2B2;">
+        <h4 style="color:#C53030; margin-bottom:10px;" data-i18n="override_btn">Override Result</h4>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="new_grade_label">New Lot Grade</label>
+          <select id="override-new-grade-select" class="form-select">
+            <option value="Grade A">Grade A</option>
+            <option value="URS">URS (Under-Rated / Sub-standard)</option>
+            <option value="Defective">Defective</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="override_reason_label">Reason for Override (Min 10 chars)</label>
+          <textarea id="override-reason-textarea" class="form-textarea" rows="3" placeholder="e.g. Physical cross-cut inspection found internal black rot..."></textarea>
+          <span id="override-char-count" style="font-size:0.75rem; color:var(--color-text-muted);">0 / 10 characters minimum</span>
+        </div>
+
+        <button id="submit-override-btn" class="btn btn-rose btn-block" disabled data-i18n="submit_override">Confirm Override</button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 9: DIGITAL REPORT
+         ==================================================================== -->
+    <section id="screen-report" class="screen">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <button class="icon-btn back-btn" data-target="screen-dashboard">←</button>
+        <h2 class="serif-wordmark" data-i18n="report_title">Quality Report</h2>
+      </div>
+
+      <div class="card" style="padding:16px;">
+        <!-- Report Header -->
+        <div style="border-bottom:1px solid var(--color-border); padding-bottom:10px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="report-batch-code" class="serif-wordmark" style="font-size:1.2rem; color:var(--color-forest);">KS-2026-00001</span>
+            <span id="report-status-stamp" class="demo-badge">VERIFIED</span>
+          </div>
+          <p id="report-farmer-centre" style="font-size:0.8rem; color:var(--color-text-muted); margin-top:4px;">Farmer: Ramesh Patil · Nashik APMC</p>
+          <p id="report-date" style="font-size:0.75rem; color:var(--color-text-muted);">03 Oct 2026, 14:30 UTC</p>
+        </div>
+
+        <!-- Three-Bucket Summary -->
+        <div class="buckets-grid">
+          <div class="bucket-card grade-a">
+            <div id="rep-grade-a-pct" class="bucket-pct">75.0%</div>
+            <div id="rep-grade-a-count" class="bucket-count">9</div>
+            <div class="bucket-name">Grade A</div>
+          </div>
+          <div class="bucket-card urs">
+            <div id="rep-urs-pct" class="bucket-pct">16.7%</div>
+            <div id="rep-urs-count" class="bucket-count">2</div>
+            <div class="bucket-name">URS</div>
+          </div>
+          <div class="bucket-card defective">
+            <div id="rep-defective-pct" class="bucket-pct">8.3%</div>
+            <div id="rep-defective-count" class="bucket-count">1</div>
+            <div class="bucket-name">Defective</div>
+          </div>
+        </div>
+
+        <!-- QR Verification Section -->
+        <div style="display:flex; align-items:center; gap:12px; background-color:#F0FDF4; padding:10px; border-radius:var(--radius-md); border:1px solid #BBF7D0; margin:12px 0;">
+          <img id="report-qr-img" src="" alt="QR" style="width:68px; height:68px; border-radius:4px; background:#FFF;">
+          <div style="flex:1;">
+            <div style="font-size:0.8rem; font-weight:700; color:var(--color-forest);" data-i18n="scan_to_verify">Scan QR to verify report online</div>
+            <div id="report-hash-preview" style="font-family:monospace; font-size:0.65rem; color:var(--color-text-muted); word-break:break-all; margin-top:2px;">
+              SHA-256 Hash
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; gap:8px;">
+          <button id="download-pdf-btn" class="btn btn-primary" style="flex:1;" data-i18n="download_pdf">📥 Download PDF</button>
+          <button id="share-report-btn" class="btn btn-outline" style="flex:1;" data-i18n="share_report">🔗 Share</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 11: FARMER - MY BATCHES
+         ==================================================================== -->
+    <section id="screen-farmer-batches" class="screen">
+      <div style="margin-bottom:12px;">
+        <p style="font-size:0.8rem; color:var(--color-text-muted);" data-i18n="farmer_greeting">Welcome</p>
+        <h2 id="farmer-welcome-name" class="serif-wordmark">Ramesh Patil</h2>
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="filter-chips-row">
+        <button class="chip active" data-farmer-filter="all" data-i18n="filter_all">All</button>
+        <button class="chip" data-farmer-filter="Grade A" data-i18n="filter_grade_a">Grade A</button>
+        <button class="chip" data-farmer-filter="URS" data-i18n="filter_urs">URS</button>
+        <button class="chip" data-farmer-filter="Defective" data-i18n="filter_defective">Defective</button>
+      </div>
+
+      <!-- Farmer Batches List -->
+      <div id="farmer-batches-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 12: FARMER - BATCH REPORT & VOICE
+         ==================================================================== -->
+    <section id="screen-farmer-detail" class="screen">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <button class="icon-btn back-btn" data-target="screen-farmer-batches">←</button>
+        <h2 id="farmer-detail-batch-code" class="serif-wordmark">KS-2026-00001</h2>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span id="farmer-detail-centre" style="font-size:0.85rem; color:var(--color-text-muted);">Nashik APMC</span>
+          <button id="farmer-speak-btn" class="btn btn-sm btn-rose" style="border-radius:var(--radius-full);" data-i18n="read_aloud">🔊 Read Aloud</button>
+        </div>
+
+        <div id="farmer-detail-lot-grade" style="font-size:1.6rem; font-weight:800; color:var(--color-forest); margin-bottom:12px;">
+          Grade A (75.0%)
+        </div>
+
+        <!-- Visual Progress Bars -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; margin-bottom:2px;">
+            <span data-i18n="grade_a">Grade A (Premium)</span>
+            <span id="farmer-bar-grade-a-val">75%</span>
+          </div>
+          <div style="height:10px; background:#E5E7EB; border-radius:5px; overflow:hidden; margin-bottom:8px;">
+            <div id="farmer-bar-grade-a" style="height:100%; width:75%; background:var(--bucket-grade-a);"></div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; margin-bottom:2px;">
+            <span data-i18n="grade_urs">URS (Undersized)</span>
+            <span id="farmer-bar-urs-val">17%</span>
+          </div>
+          <div style="height:10px; background:#E5E7EB; border-radius:5px; overflow:hidden; margin-bottom:8px;">
+            <div id="farmer-bar-urs" style="height:100%; width:17%; background:var(--bucket-urs);"></div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; margin-bottom:2px;">
+            <span data-i18n="grade_defective">Defective</span>
+            <span id="farmer-bar-defective-val">8%</span>
+          </div>
+          <div style="height:10px; background:#E5E7EB; border-radius:5px; overflow:hidden; margin-bottom:8px;">
+            <div id="farmer-bar-defective" style="height:100%; width:8%; background:var(--bucket-defective);"></div>
+          </div>
+        </div>
+
+        <!-- Images Thumbnail Preview -->
+        <div style="margin-top:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:0.85rem; font-weight:700;" data-i18n="view_images">Captured Images</span>
+            <button id="farmer-toggle-boxes-btn" class="btn btn-sm btn-outline" style="min-height:26px; padding:2px 8px; font-size:0.75rem;" data-i18n="toggle_annotation">Toggle AI Overlay</button>
+          </div>
+          <div id="farmer-detail-image-wrap" class="canvas-interactive-wrap">
+            <canvas id="farmer-detail-canvas"></canvas>
+          </div>
+        </div>
+
+        <button id="farmer-download-pdf-btn" class="btn btn-primary btn-block" style="margin-top:12px;" data-i18n="download_pdf">📥 Download Certificate PDF</button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 13: ADMIN DASHBOARD (Screen 13)
+         ==================================================================== -->
+    <section id="screen-admin-dashboard" class="screen">
+      <!-- Admin Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div>
+          <h2 class="serif-wordmark" style="color:var(--color-teal);" data-i18n="admin_dashboard_title">System Overview</h2>
+          <p style="font-size:0.8rem; color:var(--color-text-muted);">Admin Governance & Performance Metrics</p>
+        </div>
+        <!-- Period Selector -->
+        <select id="admin-period-select" class="form-select" style="width:auto; min-height:36px; padding:4px 10px; font-size:0.82rem;">
+          <option value="7d" data-i18n="period_7d">Last 7 Days</option>
+          <option value="30d" selected data-i18n="period_30d">Last 30 Days</option>
+          <option value="all" data-i18n="period_all">All Time</option>
+        </select>
+      </div>
+
+      <!-- 4 KPI Cards -->
+      <div class="admin-kpi-grid">
+        <div class="kpi-card">
+          <div id="kpi-total-batches" class="kpi-val">0</div>
+          <div class="kpi-lbl" data-i18n="admin_kpi_total_batches">Total Batches</div>
+        </div>
+        <div class="kpi-card">
+          <div id="kpi-total-centres" class="kpi-val">0</div>
+          <div class="kpi-lbl" data-i18n="admin_kpi_centres">Active Centres</div>
+        </div>
+        <div class="kpi-card">
+          <div id="kpi-avg-grade-a" class="kpi-val">0%</div>
+          <div class="kpi-lbl" data-i18n="admin_kpi_avg_grade_a">Avg Grade A %</div>
+        </div>
+        <div class="kpi-card">
+          <div id="kpi-override-rate" class="kpi-val">0%</div>
+          <div class="kpi-lbl" data-i18n="admin_kpi_override_rate">Override Rate %</div>
+        </div>
+      </div>
+
+      <!-- Centre Performance Bar Chart -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="font-size:1rem; color:var(--color-teal);" data-i18n="centre_performance">Centre Performance</h3>
+          <span style="font-size:0.7rem; color:#C53030; font-weight:700;">⚠ >15% Overrides Flagged</span>
+        </div>
+        <div id="centre-chart-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Admin Navigation Cards -->
+      <div style="margin-top:8px; margin-bottom:6px; font-size:0.9rem; font-weight:700; color:var(--color-teal);">
+        Management Modules
+      </div>
+      <div class="admin-nav-grid">
+        <div class="admin-nav-card" data-admin-tab="users">
+          <span style="font-size:1.4rem;">👥</span>
+          <div>
+            <div style="font-weight:700; font-size:0.88rem;" data-i18n="admin_nav_users">Users</div>
+            <div style="font-size:0.72rem; color:var(--color-text-muted);">Roles & Access</div>
+          </div>
+        </div>
+
+        <div class="admin-nav-card" data-admin-tab="centres">
+          <span style="font-size:1.4rem;">🏬</span>
+          <div>
+            <div style="font-weight:700; font-size:0.88rem;" data-i18n="admin_nav_centres">Centres</div>
+            <div style="font-size:0.72rem; color:var(--color-text-muted);">Codes C01-C04</div>
+          </div>
+        </div>
+
+        <div class="admin-nav-card" data-admin-tab="rules">
+          <span style="font-size:1.4rem;">⚙️</span>
+          <div>
+            <div style="font-weight:700; font-size:0.88rem;" data-i18n="admin_nav_rules">Grading Rules</div>
+            <div style="font-size:0.72rem; color:var(--color-text-muted);">Version Governance</div>
+          </div>
+        </div>
+
+        <div class="admin-nav-card" data-admin-tab="audit">
+          <span style="font-size:1.4rem;">📜</span>
+          <div>
+            <div style="font-weight:700; font-size:0.88rem;" data-i18n="admin_nav_audit">Audit Logs</div>
+            <div style="font-size:0.72rem; color:var(--color-text-muted);">Immutable Trail</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCREEN 14: ADMIN MANAGEMENT & GOVERNANCE PAGES (Screen 14)
+         ==================================================================== -->
+    <section id="screen-admin-management" class="screen">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <button class="icon-btn back-btn" data-target="screen-admin-dashboard">←</button>
+        <h2 id="admin-mgmt-title" class="serif-wordmark" style="color:var(--color-teal);" data-i18n="admin_nav_users">User Management</h2>
+      </div>
+
+      <!-- Management Sub-Tabs Nav -->
+      <div class="filter-chips-row" style="margin-bottom:12px;">
+        <button class="chip active" data-mgmt-tab="users" data-i18n="admin_nav_users">Users</button>
+        <button class="chip" data-mgmt-tab="centres" data-i18n="admin_nav_centres">Centres</button>
+        <button class="chip" data-mgmt-tab="rules" data-i18n="admin_nav_rules">Grading Rules</button>
+        <button class="chip" data-mgmt-tab="audit" data-i18n="admin_nav_audit">Audit Logs</button>
+      </div>
+
+      <!-- ── TAB 1: USERS ────────────────────────────────────────────────── -->
+      <div id="admin-subtab-users" class="mgmt-subtab">
+        <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+          <input type="text" id="admin-search-users" class="form-input" style="flex:2; min-width:180px;" placeholder="Search name/phone/email..." data-i18n-placeholder="search_users_placeholder">
+          <select id="admin-filter-role" class="form-select" style="flex:1; min-width:120px;">
+            <option value="" data-i18n="filter_role_all">All Roles</option>
+            <option value="farmer">Farmer</option>
+            <option value="staff">Staff</option>
+            <option value="csc">CSC Operator</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button id="admin-add-user-btn" class="btn btn-teal btn-sm" data-i18n="add_user_btn">+ Add User</button>
+        </div>
+
+        <div class="card" style="padding:8px;">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Centre</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 2: CENTRES ──────────────────────────────────────────────── -->
+      <div id="admin-subtab-centres" class="mgmt-subtab" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="font-size:1rem; color:var(--color-teal);" data-i18n="manage_centres_title">Procurement Centres</h3>
+          <button id="admin-add-centre-btn" class="btn btn-teal btn-sm" data-i18n="add_centre_btn">+ Add Centre</button>
+        </div>
+
+        <div class="card" style="padding:8px;">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-centres-tbody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 3: GRADING RULES ────────────────────────────────────────── -->
+      <div id="admin-subtab-rules" class="mgmt-subtab" style="display:none;">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--color-border); padding-bottom:8px;">
+            <h3 style="font-size:1rem; color:var(--color-teal);" data-i18n="manage_rules_title">Grading Rules Governance</h3>
+            <span id="rules-current-version-tag" class="demo-badge" style="background:#E0F2F6; color:#093742; border-color:#105666;">Version v2.0</span>
+          </div>
+
+          <p style="font-size:0.78rem; color:var(--color-text-muted); margin-bottom:14px;" data-i18n="rules_immutable_notice">
+            Saving creates a new versioned snapshot (e.g., v2.1). Past reports remain linked to their original grading rule version.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="min_size_label">Min Diameter for Grade A (cm)</label>
+            <input type="number" id="rules-min-size-input" class="form-input" step="0.1" value="6.0">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" data-i18n="grade_a_threshold_label">Grade A Threshold (%)</label>
+              <input type="number" id="rules-grade-a-thresh" class="form-input" step="1.0" value="70">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="defective_threshold_label">Defective Threshold (%)</label>
+              <input type="number" id="rules-defective-thresh" class="form-input" step="1.0" value="30">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Target New Rule Version (e.g. v2.1)</label>
+            <input type="text" id="rules-new-version-input" class="form-input" value="v2.1">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="rule_change_note_label">Version Change Note (Required, min 5 chars)</label>
+            <textarea id="rules-change-note" class="form-textarea" rows="2" placeholder="e.g. Updated minimum diameter threshold based on Maharashtra APMC directive..."></textarea>
+          </div>
+
+          <button id="rules-publish-btn" class="btn btn-teal btn-block" data-i18n="save_new_version_btn">Publish New Rule Version</button>
+        </div>
+      </div>
+
+      <!-- ── TAB 4: AUDIT LOGS ────────────────────────────────────────────── -->
+      <div id="admin-subtab-audit" class="mgmt-subtab" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <h3 style="font-size:1rem; color:var(--color-teal);" data-i18n="audit_log_title">System Audit Trail</h3>
+            <span class="demo-badge" style="background:#EDF2F7; color:#4A5568;" data-i18n="audit_readonly_badge">Strictly Read-Only (Immutable)</span>
+          </div>
+          <button id="admin-audit-export-btn" class="btn btn-teal btn-sm" data-i18n="export_csv">📥 Export CSV</button>
+        </div>
+
+        <!-- Audit Filters -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+          <input type="text" id="audit-filter-batch" class="form-input" style="min-height:36px;" placeholder="Search Batch Code...">
+          <select id="audit-filter-action" class="form-select" style="min-height:36px;">
+            <option value="" data-i18n="filter_action_all">All Actions</option>
+            <option value="verify_override">Overridden</option>
+            <option value="verify_approve">Approved</option>
+            <option value="update_grading_rules">Rules Update</option>
+            <option value="create_user">User Creation</option>
+            <option value="seed_lot">Seed Demo Data</option>
+          </select>
+        </div>
+
+        <div id="audit-log-list-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         BOTTOM NAVIGATION BAR
+         ==================================================================== -->
+    <nav id="bottom-navigation" class="bottom-nav" style="display:none;">
+      <button class="nav-item active" data-nav="screen-dashboard" id="nav-staff-tab">
+        <span class="nav-icon">🏠</span>
+        <span data-i18n="nav_home">Home</span>
+      </button>
+      <button class="nav-item" data-nav="screen-admin-dashboard" id="nav-admin-tab" style="display:none;">
+        <span class="nav-icon">🛡️</span>
+        <span data-i18n="nav_admin">Admin</span>
+      </button>
+      <button class="nav-item" data-nav="screen-create-batch" id="nav-new-batch-tab">
+        <span class="nav-icon">➕</span>
+        <span data-i18n="nav_batches">New</span>
+      </button>
+      <button class="nav-item" data-nav="screen-farmer-batches" id="nav-farmer-tab" style="display:none;">
+        <span class="nav-icon">📋</span>
+        <span data-i18n="nav_batches">Batches</span>
+      </button>
+      <button class="nav-item" data-nav="screen-profile">
+        <span class="nav-icon">👤</span>
+        <span data-i18n="nav_profile">Profile</span>
+      </button>
+    </nav>
+
+    <!-- ====================================================================
+         MODAL: AUDIT LOG JSON DIFF DRAWER
+         ==================================================================== -->
+    <div id="audit-diff-modal" class="modal-backdrop">
+      <div class="modal-dialog">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 class="serif-wordmark" style="color:var(--color-teal);">Audit Diff Record</h3>
+          <button id="close-audit-diff-btn" class="icon-btn" style="color:var(--color-text-muted);">✕</button>
+        </div>
+
+        <div style="font-size:0.8rem; margin-bottom:8px;">
+          <strong>Action:</strong> <span id="diff-action-tag">verify_override</span> |
+          <strong>Entity:</strong> <span id="diff-entity-tag">lot #3</span>
+        </div>
+
+        <div class="card" style="background-color:#1E293B; color:#F8FAFC; padding:12px; font-family:monospace; font-size:0.75rem; overflow-x:auto;">
+          <div style="color:#94A3B8; font-weight:700; margin-bottom:4px;">[BEFORE STATE]</div>
+          <pre id="diff-before-json" style="white-space:pre-wrap; word-break:break-all; color:#FCA5A5;"></pre>
+          <hr style="border-color:#475569; margin:8px 0;">
+          <div style="color:#94A3B8; font-weight:700; margin-bottom:4px;">[AFTER STATE]</div>
+          <pre id="diff-after-json" style="white-space:pre-wrap; word-break:break-all; color:#86EFAC;"></pre>
+        </div>
+
+        <p id="diff-reason-text" style="font-size:0.8rem; color:var(--color-text-muted); margin-top:8px;"></p>
+        <button id="dismiss-diff-btn" class="btn btn-teal btn-block" style="margin-top:12px;" data-i18n="close">Close</button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL: CREATE USER
+         ==================================================================== -->
+    <div id="create-user-modal" class="modal-backdrop">
+      <div class="modal-dialog">
+        <h3 class="serif-wordmark" style="color:var(--color-teal); margin-bottom:12px;" data-i18n="add_user_btn">+ Add User</h3>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="modal-user-name" class="form-input" placeholder="e.g. Ramesh Kumar">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="modal-user-role" class="form-select">
+            <option value="farmer">Farmer</option>
+            <option value="staff">Procurement Staff</option>
+            <option value="csc">CSC Operator</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assigned Centre</label>
+          <select id="modal-user-centre" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (Optional)</label>
+          <input type="email" id="modal-user-email" class="form-input" placeholder="user@agrigrade.in">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number (Optional)</label>
+          <input type="tel" id="modal-user-phone" class="form-input" placeholder="+919876543210">
+        </div>
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button id="cancel-create-user-btn" class="btn btn-outline" style="flex:1;" data-i18n="cancel">Cancel</button>
+          <button id="save-create-user-btn" class="btn btn-teal" style="flex:1;" data-i18n="save">Save User</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL: CREATE CENTRE
+         ==================================================================== -->
+    <div id="create-centre-modal" class="modal-backdrop">
+      <div class="modal-dialog">
+        <h3 class="serif-wordmark" style="color:var(--color-teal); margin-bottom:12px;" data-i18n="add_centre_btn">+ Add Procurement Centre</h3>
+        <div class="form-group">
+          <label class="form-label" data-i18n="centre_code_label">Centre Code</label>
+          <input type="text" id="modal-centre-code" class="form-input" placeholder="e.g. C04">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="centre_name_label">Centre Name</label>
+          <input type="text" id="modal-centre-name" class="form-input" placeholder="e.g. Solapur Farmers APMC Mandi">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" data-i18n="district_label">District</label>
+            <input type="text" id="modal-centre-district" class="form-input" placeholder="Solapur">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="state_label">State</label>
+            <input type="text" id="modal-centre-state" class="form-input" placeholder="Maharashtra">
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button id="cancel-create-centre-btn" class="btn btn-outline" style="flex:1;" data-i18n="cancel">Cancel</button>
+          <button id="save-create-centre-btn" class="btn btn-teal" style="flex:1;" data-i18n="save">Save Centre</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Sheet: Onion Details -->
+    <div id="onion-bottom-sheet-backdrop" class="bottom-sheet-backdrop">
+      <div class="bottom-sheet">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 id="sheet-onion-title" class="serif-wordmark">Onion #1</h3>
+          <button id="close-bottom-sheet-btn" class="icon-btn" style="color:var(--color-text-muted);">✕</button>
+        </div>
+
+        <div class="card" style="background-color:var(--color-cream); margin-bottom:12px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.88rem;">
+            <div><span style="color:var(--color-text-muted);" data-i18n="diameter">Diameter</span>: <strong id="sheet-diameter">6.5 cm</strong></div>
+            <div><span style="color:var(--color-text-muted);" data-i18n="confidence">Confidence</span>: <strong id="sheet-confidence">96%</strong></div>
+            <div><span style="color:var(--color-text-muted);" data-i18n="bucket_label">Bucket</span>: <strong id="sheet-bucket">Grade A</strong></div>
+            <div><span style="color:var(--color-text-muted);">Class</span>: <strong id="sheet-current-class">Good</strong></div>
+          </div>
+        </div>
+
+        <div class="form-group" id="relabel-group">
+          <label class="form-label" data-i18n="relabel_class">Relabel Class</label>
+          <select id="sheet-relabel-select" class="form-select">
+            <option value="good">Good (Healthy)</option>
+            <option value="damaged">Damaged (Physical Cut/Peel)</option>
+            <option value="rotten">Rotten (Black/Smut Rot)</option>
+            <option value="sprouted">Sprouted</option>
+            <option value="undersized">Undersized</option>
+          </select>
+        </div>
+
+        <button id="sheet-save-relabel-btn" class="btn btn-primary btn-block" data-i18n="save_override">Save Class Change</button>
+      </div>
+    </div>
+
+    <!-- Quick Add Farmer Modal -->
+    <div id="quick-add-farmer-modal" class="modal-backdrop">
+      <div class="modal-dialog">
+        <h3 class="serif-wordmark" style="margin-bottom:12px;" data-i18n="quick_add_farmer">+ Quick Add Farmer</h3>
+        <div class="form-group">
+          <label class="form-label" data-i18n="farmer_name">Farmer Full Name</label>
+          <input type="text" id="quick-farmer-name" class="form-input" placeholder="e.g. Ramesh Patil">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="farmer_phone">Phone Number</label>
+          <input type="tel" id="quick-farmer-phone" class="form-input" placeholder="+919876543210">
+        </div>
+        <div style="display:flex; gap:8px; margin-top:16px;">
+          <button id="cancel-quick-farmer-btn" class="btn btn-outline" style="flex:1;" data-i18n="cancel">Cancel</button>
+          <button id="save-quick-farmer-btn" class="btn btn-primary" style="flex:1;" data-i18n="save">Save Farmer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>
