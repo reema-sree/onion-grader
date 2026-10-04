@@ -1,14 +1,16 @@
-# AgriGrade - AI Onion Quality Inspection & Grading System
+# Kisan Setu — AI Onion Grading System
+# Smart India Hackathon 2026
 FROM python:3.11-slim
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app \
+    MOCK_MODEL=true \
+    SMS_MOCK=true
 
 WORKDIR /app
 
-# Install system runtime dependencies for OpenCV and networking
+# Install OpenCV system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
@@ -24,16 +26,16 @@ COPY backend/ /app/backend/
 COPY ml/ /app/ml/
 COPY docs/ /app/docs/
 COPY .env.example /app/.env.example
+COPY start.sh /app/start.sh
 
-# Create storage directories
-RUN mkdir -p /app/storage/lots /app/storage/reports
+# Create persistent storage directories
+RUN mkdir -p /app/storage/lots /app/storage/reports \
+    && chmod +x /app/start.sh
 
-# Run database seeder on container launch if DB does not exist
 EXPOSE 8000
 
 # Healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/ || exit 1
 
-# Default start command
-CMD ["sh", "-c", "python backend/seed.py && uvicorn backend.app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["/app/start.sh"]

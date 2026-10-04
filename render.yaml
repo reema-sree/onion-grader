@@ -1,13 +1,19 @@
 services:
   - type: web
     name: kisan-setu-onion-grader
-    env: python
+    env: docker
     region: singapore
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -c "import sys; sys.path.insert(0, '.'); from backend.seed import seed_database; seed_database()" && uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: MOCK_MODEL
         value: "true"
+      - key: SMS_MOCK
+        value: "true"
       - key: SECRET_KEY
-        value: sih2026_kisan_setu_secret_key_demo_agrigrade
+        value: sih2026_kisan_setu_secret_key_agrigrade_demo
+      - key: PUBLIC_BASE_URL
+        fromService:
+          type: web
+          name: kisan-setu-onion-grader
+          property: host
